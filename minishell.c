@@ -1,6 +1,6 @@
 
-#include "minishell.h"
 
+#include "minishell.h"
 
 void	ft_history_init_fd(char *file, int *fd)
 {

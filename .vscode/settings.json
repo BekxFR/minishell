@@ -1,7 +1,11 @@
 {
 	"files.associations": {
 		"errno.h": "c",
-		"fcntl.h": "c"
+		"fcntl.h": "c",
+		"resource.h": "c",
+		"history.h": "c",
+		"stdio.h": "c",
+		"dirent.h": "c"
 	},
 	"workbench.colorCustomizations": {
 		"activityBar.activeBackground": "#228d87",
