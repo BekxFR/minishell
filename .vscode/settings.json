@@ -2,5 +2,25 @@
 	"files.associations": {
 		"errno.h": "c",
 		"fcntl.h": "c"
-	}
+	},
+	"workbench.colorCustomizations": {
+		"activityBar.activeBackground": "#228d87",
+		"activityBar.background": "#228d87",
+		"activityBar.foreground": "#e7e7e7",
+		"activityBar.inactiveForeground": "#e7e7e799",
+		"activityBarBadge.background": "#7b1f80",
+		"activityBarBadge.foreground": "#e7e7e7",
+		"commandCenter.border": "#e7e7e799",
+		"sash.hoverBorder": "#228d87",
+		"statusBar.background": "#186460",
+		"statusBar.foreground": "#e7e7e7",
+		"statusBarItem.hoverBackground": "#228d87",
+		"statusBarItem.remoteBackground": "#186460",
+		"statusBarItem.remoteForeground": "#e7e7e7",
+		"titleBar.activeBackground": "#186460",
+		"titleBar.activeForeground": "#e7e7e7",
+		"titleBar.inactiveBackground": "#18646099",
+		"titleBar.inactiveForeground": "#e7e7e799"
+	},
+	"peacock.color": "#186460"
 }

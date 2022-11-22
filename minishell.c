@@ -1,12 +1,6 @@
 
 #include "minishell.h"
 
-void	ft_cleanhistory_fd(char *str, char *buffer, int fd)
-{
-	free(str);
-	free(buffer);
-	close(fd);
-}
 
 void	ft_history_init_fd(char *file, int *fd)
 {
@@ -21,18 +15,6 @@ void	ft_history_init_fd(char *file, int *fd)
 	}
 }
 
-int	ft_history_end(char *str, int i, t_m *var)
-{
-	if (str[i] == '\n')
-	{
-		write((*var).history_fd, str, strlen(str));
-		(*var).args_line = ft_strdup(str);
-		close((*var).history_fd);
-		return (0);
-	}
-	return (1);
-}
-
 void	write_first_c(char *buffer, char *str)
 {
 	buffer[0] = '\0';
@@ -41,48 +23,44 @@ void	write_first_c(char *buffer, char *str)
 
 void	ft_init_commands_history(t_m *var)
 {
-	char	*buffer;
-	char	*str;
-	int		j;
-	int		n;
+	char *str;
 
-	j = 0;
-	n = 1;
-	ft_history_init_fd(".history", &(*var).history_fd);
-	buffer = (char *)malloc(sizeof(char) * 2);
-	if (!buffer)
-		return ;
-	str = (char *)malloc(sizeof(char) * 2);
-	if (!str)
-		return ;
-	write_first_c(buffer, str);
-	while (n > 0)
+	str = readline("minishell>");
+	if (str)
 	{
-		n = (read(0, buffer, 1));
-		if (n == -1)
-			ft_cleanhistory_fd(str, buffer, (*var).history_fd);
-		buffer[1] = '\0';
-		str = ft_strjoin_free(str, buffer);
-		if (!ft_history_end(str, j, var))
-			break ;
-		j++;
+		ft_history_init_fd(".history", &(*var).h_fd);
+		write((*var).h_fd, str, ft_strlen(str));
+		(*var).args_line = ft_strdup(str);
 	}
-	return (ft_cleanhistory_fd(str, buffer, (*var).history_fd));
+}
+
+void handle_sigint(int sig)
+{
+	if (sig == SIGINT)
+	{
+		write(1, "\n", 2);
+		rl_on_new_line();
+		rl_replace_line("", 0);
+		rl_redisplay();
+	}
 }
 
 int	main(int argc, char **argv, char **envp)
 {
 	t_m	var;
+	char ***args;
 
+	signal(SIGINT, handle_sigint); /* ctrl + c  affiche un nouveau prompt */
+	signal(SIGQUIT, SIG_IGN); /* ctrl + \  ne fait rien */
 	(void)argv;
 	(void)envp;
-	if (argc == 1)
-	{
-		ft_init_commands_history(&var);
-		ft_printf("Command is :%s", var.args_line);
-		free(var.args_line);
-	}
-	else
-		ft_printf("Error : Wrong Number of arguments\n");
+	if (argc != 1)
+		return (ft_printf("Error : Wrong Number of arguments\n"), 1);
+	ft_init_commands_history(&var);
+	ft_printf("Command is :%s", var.args_line);
+	args = ft_parsing(var.args_line); //
+	ft_puttripletab(args); //
+	(void)args; // 
+	free(var.args_line); //
 	return (0);
 }
