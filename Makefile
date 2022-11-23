@@ -26,10 +26,15 @@ NC = \033[0m
 
 SRCS = minishell.c	\
 	ft_parsing.c \
-	mathieu_utils.c \
-	is_cmdline_valid.c \
-	clean_quote.c \
-
+		mathieu_utils.c \
+		is_cmdline_valid.c \
+		clean_args.c \
+		replace_env_var.c \
+		set_in_cmd.c \
+		is_in_quote.c \
+		initialize_index.c \
+		get_args.c \
+		free_minishell.c  \
 
 BONUS = \
 

@@ -1,31 +1,36 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_pwd.c                                           :+:      :+:    :+:   */
+/*   initialize_index.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mgruson <mgruson@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/11/14 15:15:09 by mgruson           #+#    #+#             */
-/*   Updated: 2022/11/14 15:36:42 by mgruson          ###   ########.fr       */
+/*   Created: 2022/11/21 16:55:46 by mgruson           #+#    #+#             */
+/*   Updated: 2022/11/22 16:48:28 by mgruson          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "minishell.h"
 
-void ft_pwd(void)
+t_index initialize_index()
 {
-	char *pwd;
-	
-	pwd = NULL;
-	pwd = getcwd(pwd, 0);
-	printf("%s\n", pwd);
-	free(pwd);
-}
+	t_index	i;
 
-int	main()
-{
-	ft_pwd();
-	return (0);		
+	i.i = 0;
+	i.i1 = 0;
+	i.i2 = 0;
+	i.i3 = 0;
+	i.j = 0;
+	i.j1 = 0;
+	i.j2 = 0;
+	i.j3 = 0;
+	i.start = 0;
+	i.end = 0;
+	i.count = 0;
+	i.k = 0;
+	i.t = 0;
+	i.l = 0;
+	i.counter = 0;
+	i.len = 0;	
+	return (i);
 }
