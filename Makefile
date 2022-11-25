@@ -12,7 +12,8 @@ SRC_DIR := sources/
 OBJ_DIR := objects/
 AR := ar rc
 RM := rm
-VAL := valgrind --leak-check=full --track-origins=yes --track-fds=yes
+VAL := valgrind --leak-check=full --track-origins=yes --trace-children=yes --track-fds=yes
+# VAL := valgrind --leak-check=full --track-origins=yes --track-fds=yes
 
 BLACK = \033[1;30m
 REDBG = \033[30;41m
@@ -35,6 +36,8 @@ SRCS = minishell.c	\
 		initialize_index.c \
 		get_args.c \
 		free_minishell.c  \
+		ft_env_unset.c	\
+		ft_export.c	\
 
 BONUS = \
 
@@ -89,6 +92,27 @@ ${SOFT_BONUS} :
 
 test : all
 	${VAL} ./${SOFT_NAME}
+	@echo "${BLUE}###${GREEN}Lecture du fichier .history${BLUE}###${NC}"
+	@cat .history
+	@echo "${BLUE}###${GREEN}Lecture du fichier Outfile${BLUE}###${NC}"
+	@cat test2
+
+test1 : all
+	${VAL} env -i ./${SOFT_NAME}
+	@echo "${BLUE}###${GREEN}Lecture du fichier .history${BLUE}###${NC}"
+	@cat .history
+	@echo "${BLUE}###${GREEN}Lecture du fichier Outfile${BLUE}###${NC}"
+	@cat test2
+
+test2 : all
+	env -i ${VAL} ./${SOFT_NAME}
+	@echo "${BLUE}###${GREEN}Lecture du fichier .history${BLUE}###${NC}"
+	@cat .history
+	@echo "${BLUE}###${GREEN}Lecture du fichier Outfile${BLUE}###${NC}"
+	@cat test2
+
+test3 : all
+	env -i ${VAL} /usr/bin/env -i ./${SOFT_NAME}
 	@echo "${BLUE}###${GREEN}Lecture du fichier .history${BLUE}###${NC}"
 	@cat .history
 	@echo "${BLUE}###${GREEN}Lecture du fichier Outfile${BLUE}###${NC}"

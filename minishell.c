@@ -30,7 +30,9 @@ void	ft_init_commands_history(t_m *var)
 	{
 		ft_history_init_fd(".history", &(*var).h_fd);
 		write((*var).h_fd, str, ft_strlen(str));
+		// (*var).args_line = str;
 		(*var).args_line = ft_strdup(str);
+		free(str);
 	}
 }
 
@@ -47,18 +49,6 @@ void	ft_print_split(char **str)
 	ft_printf("-----------------\n");
 }
 
-void	ft_print_env(char **str)
-{
-	int	i;
-
-	i = 0;
-	while (str[i])
-	{
-		printf("%s\n", str[i]);
-		i++;
-	}
-}
-
 void handle_sigint(int sig)
 {
 	if (sig == SIGINT)
@@ -68,38 +58,6 @@ void handle_sigint(int sig)
 		rl_replace_line("", 0);
 		rl_redisplay();
 	}
-}
-
-int	ft_env(t_m *var, char **envp)
-{
-	int i;
-	if (!envp)
-	{
-		(*var).env = (char **)malloc(sizeof(char *) * 1);
-		if (!(*var).env)
-			return (-1);
-		(*var).env[0] = (char *)malloc(sizeof(char) * 1);
-		if (!(*var).env[0])
-			return (free((*var).env), -1);
-		(*var).env[0][0] = '\0';
-		return (1);
-	}
-	i = 0;
-	while (envp[i])
-		i++;
-	(*var).env = (char **)malloc(sizeof(char *) * (i + 1));
-	if (!(*var).env)
-		return (-1);
-	(*var).env[i] = 0;
-	if (!(*var).env)
-		return (-1);
-	i = 0;
-	while (envp[i])
-	{
-		(*var).env[i] = ft_strdup(envp[i]);
-		i++;
-	}
-	return (0);
 }
 
 void	ft_free_split(char **str)
@@ -128,7 +86,8 @@ int	main(int argc, char **argv, char **envp)
 		return (ft_printf("Error : Wrong Number of arguments\n"), 1);
 	if (ft_env(&var, envp) == -1)
 		return (ft_printf("Error : Malloc for keep env fail\n"), 1);
-	ft_print_env(var.env);
+	if(!*envp)
+		write(2, "EXIT PATH\n", 11);
 	ft_init_commands_history(&var);
 	ft_printf("Command is :%s\n", var.args_line);
 	args = ft_parsing(var.args_line, envp);

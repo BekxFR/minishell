@@ -52,42 +52,42 @@ typedef struct s_index
 /* fill_args.c*/
 
 char	**fill_args(char *s, char c, char **s1);
-char ***fill_cmd(char ***cmd, char **args);
-char ***malloc_cmd(char ***cmd, char **args);
+char	***fill_cmd(char ***cmd, char **args);
+char	***malloc_cmd(char ***cmd, char **args);
 
 /* ft_parsing.c */
 
 char	***ft_parsing(char *s, char **envp);
-int	is_in_quote(char *str, int i);
-int	double_pointer_nbr(char *s, char c);
-char *malloc_simple_pointer(int count, int t, char **s1);
+int		is_in_quote(char *str, int i);
+int		double_pointer_nbr(char *s, char c);
+char	*malloc_simple_pointer(int count, int t, char **s1);
 char	**simple_pointer_nbr(char *s, char c, char **s1);
-char **get_args(char *s, char c);
-int	ft_triple_pointer_len(char *s);
-char ***set_in_cmd(char ***cmd, char **args, char *s);
+char	**get_args(char *s, char c);
+int		ft_triple_pointer_len(char *s);
+char	***set_in_cmd(char ***cmd, char **args, char *s);
 
 /* mathieu_utils.c */
 
 void	ft_putdoubletab(char **tab);
 void	ft_puttripletab(char ***test);
-int	ft_tablen(char **tab);
+int		ft_tablen(char **tab);
 
 /* is_cmdline_valid.c */
 
-int is_cmdline_valid(char *str);
+int	is_cmdline_valid(char *str);
 
 /* clean_quote.c */
 
-char ***clean_args(char ***cmd);
+char 	***clean_args(char ***cmd);
 
 /* replace_env_var.c */
 
-void handle_environment_variables(char **argv, char **envp);
+void	handle_environment_variables(char **argv, char **envp);
 
 /* is_in_quote.c  */
 
-int is_in_simple_quote(char *str, int i);
-int is_in_quote(char *str, int i);
+int		is_in_simple_quote(char *str, int i);
+int		is_in_quote(char *str, int i);
 
 /* initialize_index.c */
 
@@ -96,15 +96,28 @@ t_index initialize_index();
 /* malloc_args.c */
 
 char	**simple_pointer_nbr(char *s, char c, char **s1);
-char *malloc_simple_pointer(int count, int t, char **s1);
-int	double_pointer_nbr(char *s, char c);
-char **get_args(char *s, char c);
+char	*malloc_simple_pointer(int count, int t, char **s1);
+int		double_pointer_nbr(char *s, char c);
+char	**get_args(char *s, char c);
 
 /* free_minishell.c */
 
-void free_error_tripletab(char ***tab, int i);
+void	free_error_tripletab(char ***tab, int i);
 void	free_doubletab(char **s);
 void	free_error_doubletab(char **str, int i);
-void free_tripletab(char ***tab);
+void	free_tripletab(char ***tab);
+
+/* ft_export.c */
+void	ft_exportunset_with_arg(t_m *var, char **args, int soft);
+void	ft_export_check_double(t_m *var, char *args, int egalen);
+void	ft_export_add(t_m *var, char *args);
+int		ft_export_check_args(char *args, int *egalen);
+
+/* ft_env_unset.c */
+int		ft_unset_check_args(char *args, int *egalen);
+void	ft_unset_remove(t_m *var, int m);
+void	ft_unset_check_double(t_m *var, char *args, int egalen);
+void	ft_print_env(char **str);
+int		ft_env(t_m *var, char **envp);
 
 #endif
