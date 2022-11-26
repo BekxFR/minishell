@@ -19,6 +19,7 @@
 # include <string.h>
 # include <termios.h>
 # include <sys/wait.h>
+# include <errno.h>
 # include "libs/libft/includes/libft.h"
 # include "libs/libft/includes/ft_printf.h"
 
@@ -27,6 +28,19 @@ typedef struct s_minishell
 	char	*args_line;
 	char	**env;
 	int		h_fd;
+	int		pcmd_line;
+	char	**split_path;
+	char	*path;
+	char	*arg;
+	int		pipex[2];
+	int		exec;
+	int		tabexec;
+
+	int	tablen;
+	char	*comp;
+	int	heredoc_status;
+	int	fd1;
+	int	fd2;
 }	t_m;
 
 typedef struct s_index
@@ -119,5 +133,49 @@ void	ft_unset_remove(t_m *var, int m);
 void	ft_unset_check_double(t_m *var, char *args, int egalen);
 void	ft_print_env(char **str);
 int		ft_env(t_m *var, char **envp);
+
+/* ft_fork.c */
+void	ft_do_fork(t_m *var, char *arg, char **targ, int *pid);
+void	ft_do_pipe_fork(t_m *var, char *arg, char **targ, int *pid);
+void	ft_init_arg(char *argv, t_m *var);
+void	ft_arg_check_fullpath(char *argv, t_m*var);
+void	ft_fork_fail(t_m *var);
+
+/* ft_exec.c */
+void	ft_execve(char *pcmd, char **option, char **envp, t_m *var);
+void	ft_arg_with_path(char *arg, int *cmd);
+void	ft_add_arg_totchar(char **str, char *arg, char c);
+int		ft_check_access(char *argv, char **split);
+
+/* ft_path_args_tools.c */
+void	ft_free_split_exclude_line(char **str, int line);
+char	*ft_init_path_var(char **envp);
+
+int		ft_check_fd_status(char *file, int *fd);
+void	ft_cleanheredoc_fd(char *str, char *buffer, char *comp, int fd1);
+
+/* minishell.c */
+void	ft_history_init_fd(char *file, int *fd);
+void	ft_init_commands_history(t_m *var);
+void	ft_print_split(char **str);
+void 	handle_sigint(int sig);
+// void	ft_free_split(char **str);
+void	ft_daddy(t_m *var, int *pid, int nbcmd);
+int		ft_exec(t_m *var, char ***args);
+int		ft_puttriplelen(char ***test, t_m *var);
+
+/* ft_fd_init.c */
+void	ft_init_fd(char *file, int *fd, int *fake_fd);
+void	ft_create_init_fd(char *file, int *fd, int *fake_fd2);
+void	ft_heredoc_init_fd(char *file, int *fd, int *fake_fd2);
+void	ft_tmpheredoc_init_fd(char *file, int *fd);
+void	ft_init_fake_fd(char *file, int *fd);
+
+/* ft_heredoc */
+int		ft_eof_find(char *str, char *comp, int i, t_m *var);
+void	ft_write_here_sign(char c);
+void	ft_write_here_sign(char c);
+void	ft_heredoc_fd(t_m *var, int n, int j);
+void	ft_check_heredoc(char *argv, char *stop, t_m *var);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: chillion <chillion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/05/10 12:46:16 by chillion          #+#    #+#             */
-/*   Updated: 2022/11/24 16:05:45 by chillion         ###   ########.fr       */
+/*   Updated: 2022/11/25 15:22:37 by chillion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,5 +99,6 @@ void		*ft_zalloc(size_t nmemb, size_t size);
 void		ft_free(char **str);
 void		ft_trio_free(char **str, char **str2, char **str3);
 int			ft_len_beforechar(char *str, char c);
+void		ft_free_split(char **str);
 
 #endif

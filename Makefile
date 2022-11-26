@@ -13,7 +13,7 @@ OBJ_DIR := objects/
 AR := ar rc
 RM := rm
 VAL := valgrind --leak-check=full --track-origins=yes --trace-children=yes --track-fds=yes
-# VAL := valgrind --leak-check=full --track-origins=yes --track-fds=yes
+# VAL := valgrind --leak-check=full --track-origins=yes --log-file="LogVal" --show-leak-kinds=all --track-fds=yes
 
 BLACK = \033[1;30m
 REDBG = \033[30;41m
@@ -25,8 +25,8 @@ MAGENTA = \033[0;35m
 CYAN = \033[0;36m
 NC = \033[0m
 
-SRCS = minishell.c	\
-	ft_parsing.c \
+SRCS =	minishell.c	\
+		ft_parsing.c \
 		mathieu_utils.c \
 		is_cmdline_valid.c \
 		clean_args.c \
@@ -38,6 +38,12 @@ SRCS = minishell.c	\
 		free_minishell.c  \
 		ft_env_unset.c	\
 		ft_export.c	\
+		ft_fork.c	\
+		ft_exec.c	\
+		ft_path_args_tools.c	\
+		ft_fd_init.c	\
+		ft_heredoc.c	\
+
 
 BONUS = \
 

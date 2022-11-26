@@ -15,11 +15,11 @@ void	ft_history_init_fd(char *file, int *fd)
 	}
 }
 
-void	write_first_c(char *buffer, char *str)
-{
-	buffer[0] = '\0';
-	str[0] = '\0';
-}
+// void	write_first_c(char *buffer, char *str)
+// {
+// 	buffer[0] = '\0';
+// 	str[0] = '\0';
+// }
 
 void	ft_init_commands_history(t_m *var)
 {
@@ -30,6 +30,7 @@ void	ft_init_commands_history(t_m *var)
 	{
 		ft_history_init_fd(".history", &(*var).h_fd);
 		write((*var).h_fd, str, ft_strlen(str));
+		close((*var).h_fd);
 		// (*var).args_line = str;
 		(*var).args_line = ft_strdup(str);
 		free(str);
@@ -60,17 +61,75 @@ void handle_sigint(int sig)
 	}
 }
 
-void	ft_free_split(char **str)
+// void	ft_free_split(char **str)
+// {
+// 	int	i;
+
+// 	i = 0;
+// 	while (str[i])
+// 	{
+// 		free(str[i]);
+// 		i++;
+// 	}
+// 	free(str);
+// }
+
+void	ft_daddy(t_m *var, int *pid, int nbcmd)
 {
 	int	i;
+	int	status;
 
 	i = 0;
-	while (str[i])
+	status = 0;
+	(void)var;
+	while ((i + i) < nbcmd && nbcmd != 0)
 	{
-		free(str[i]);
+		if (waitpid(pid[i], &status, 0) == -1)
+		{
+			perror("waitpid");
+			exit(EXIT_FAILURE);
+		}
+		if (WIFEXITED(status))
+			status = WEXITSTATUS(status);
+		else if (WIFSIGNALED(status))
+			status = 128 + WTERMSIG(status);
 		i++;
 	}
-	free(str);
+	free(pid);
+}
+
+int	ft_exec(t_m *var, char ***args)
+{
+	int	*pid;
+
+	var->exec = 0;
+	var->tabexec = 0;
+	pid = (int *)malloc(sizeof(int) * (var->tablen + 1));
+	if (!pid)
+		return (printf("malloc error\n"), 1);
+	pid[var->tablen] = 0;
+	if (var->tablen == 1)
+		ft_do_fork(var, args[0][0], args[0], &pid[0]);
+	else if (var->tablen > 1)
+	{
+		while ((var->exec + var->tabexec) < var->tablen)
+		{
+			ft_do_pipe_fork(var, args[var->exec + var->tabexec][0], args[var->exec + var->tabexec], &pid[var->exec]);
+			var->exec++;
+			var->tabexec++;
+		}
+	}
+	return (ft_daddy(var, pid, var->tablen), 0);
+}
+
+int	ft_puttriplelen(char ***test, t_m *var)
+{
+	var->tablen = 0;
+	if (!test)
+		return (var->tablen);
+	while(test[var->tablen])
+		var->tablen++;
+	return (var->tablen);
 }
 
 int	main(int argc, char **argv, char **envp)
@@ -92,6 +151,8 @@ int	main(int argc, char **argv, char **envp)
 	ft_printf("Command is :%s\n", var.args_line);
 	args = ft_parsing(var.args_line, envp);
 	ft_puttripletab(args);
+	ft_puttriplelen(args, &var);
+	ft_exec(&var, args);
 	free_tripletab(args);
 	free(var.args_line);
 	ft_free_split(var.env);
