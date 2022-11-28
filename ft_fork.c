@@ -6,7 +6,7 @@
 /*   By: chillion <chillion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 14:31:02 by chillion          #+#    #+#             */
-/*   Updated: 2022/11/26 18:30:24 by chillion         ###   ########.fr       */
+/*   Updated: 2022/11/28 11:29:11 by chillion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,8 +81,7 @@ void	ft_do_pipe_fork(t_m *var, char *arg, char **targ, int *pid)
 		close((*var).pipex[0]);
 		if ((var->exec + var->tabexec + 1) != (var->tablen - 1) && (var->exec + var->tabexec) != (var->tablen - 1))
 			dup2((*var).pipex[1], 1); // dup2 sauf pour le dernier exec
-		else
-			close((*var).pipex[1]);
+		close((*var).pipex[1]);
 		ft_execve((*var).arg, targ, (*var).env, var); // char *, char **, char **, pipe
 	}
 	else

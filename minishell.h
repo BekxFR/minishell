@@ -124,7 +124,7 @@ void	free_tripletab(char ***tab);
 /* ft_export.c */
 void	ft_exportunset_with_arg(t_m *var, char **args, int soft);
 void	ft_export_check_double(t_m *var, char *args, int egalen);
-void	ft_export_add(t_m *var, char *args);
+void	ft_export_add(t_m *var, char *args, int type);
 int		ft_export_check_args(char *args, int *egalen);
 
 /* ft_env_unset.c */
@@ -151,7 +151,6 @@ int		ft_check_access(char *argv, char **split);
 void	ft_free_split_exclude_line(char **str, int line);
 char	*ft_init_path_var(char **envp);
 
-int		ft_check_fd_status(char *file, int *fd);
 void	ft_cleanheredoc_fd(char *str, char *buffer, char *comp, int fd1);
 
 /* minishell.c */
@@ -159,17 +158,15 @@ void	ft_history_init_fd(char *file, int *fd);
 void	ft_init_commands_history(t_m *var);
 void	ft_print_split(char **str);
 void 	handle_sigint(int sig);
-// void	ft_free_split(char **str);
+void	ft_free_split(char **str);
 void	ft_daddy(t_m *var, int *pid, int nbcmd);
 int		ft_exec(t_m *var, char ***args);
 int		ft_puttriplelen(char ***test, t_m *var);
 
 /* ft_fd_init.c */
-void	ft_init_fd(char *file, int *fd, int *fake_fd);
-void	ft_create_init_fd(char *file, int *fd, int *fake_fd2);
-void	ft_heredoc_init_fd(char *file, int *fd, int *fake_fd2);
-void	ft_tmpheredoc_init_fd(char *file, int *fd);
-void	ft_init_fake_fd(char *file, int *fd);
+int		ft_check_fd_status(char *file, int *fd);
+int		ft_append_init_fd(char *file, int *fd);
+int		ft_trunc_init_fd(char *file, int *fd);
 
 /* ft_heredoc */
 int		ft_eof_find(char *str, char *comp, int i, t_m *var);
@@ -177,5 +174,8 @@ void	ft_write_here_sign(char c);
 void	ft_write_here_sign(char c);
 void	ft_heredoc_fd(t_m *var, int n, int j);
 void	ft_check_heredoc(char *argv, char *stop, t_m *var);
+
+int		ft_export_check_addargs(char *args, int *egalen);
+void	ft_add_export_check_double(t_m *var, char *args, int egalen);
 
 #endif

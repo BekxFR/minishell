@@ -6,7 +6,7 @@
 /*   By: chillion <chillion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/09 16:46:47 by chillion          #+#    #+#             */
-/*   Updated: 2022/11/26 18:23:19 by chillion         ###   ########.fr       */
+/*   Updated: 2022/11/28 18:31:52 by chillion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,11 +80,11 @@ void	ft_check_heredoc(char *argv, char *stop, t_m *var)
 	n = 1;
 	j = 1;
 	(*var).heredoc_status = 0;
-	if (!ft_strncmp(argv, "here_doc", ft_strlen(argv)))
+	if (!ft_strncmp(argv, "<<", ft_strlen(argv)))
 	{
 		(*var).comp = ft_strjoin(stop, "\n");
 		(*var).heredoc_status = 1;
-		ft_tmpheredoc_init_fd(".tmp", &(*var).fd1);
+		ft_tmpheredoc_init_fd(".tmpheredoc", &(*var).fd1);
 		ft_heredoc_fd(var, n, j);
 	}
 }

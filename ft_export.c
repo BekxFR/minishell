@@ -6,7 +6,7 @@
 /*   By: chillion <chillion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/24 16:07:52 by chillion          #+#    #+#             */
-/*   Updated: 2022/11/24 16:36:27 by chillion         ###   ########.fr       */
+/*   Updated: 2022/11/28 18:05:14 by chillion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,10 @@ void	ft_exportunset_with_arg(t_m *var, char **args, int soft)
 	{
 		while (*args)
 		{
-			if (ft_export_check_args(*args, &egalen))
+			egalen = ft_export_check_addargs(*args, &egalen);
+			if (egalen > 0)
+				return (ft_add_export_check_double(var, *args, egalen));
+			if (egalen != -1 && ft_export_check_args(*args, &egalen))
 				ft_export_check_double(var, *args, egalen);
 			args++;
 		}
@@ -35,6 +38,26 @@ void	ft_exportunset_with_arg(t_m *var, char **args, int soft)
 			args++;
 		}
 	}
+}
+
+void	ft_add_export_check_double(t_m *var, char *args, int egalen)
+{
+	int		i;
+
+	i = 0;
+	while((*var).env[i])
+	{
+		if (!ft_strncmp((*var).env[i], args, (egalen)))
+		{
+			if (var->env[i][egalen] == '=')
+			{
+				(*var).env[i] = ft_strjoin_free((*var).env[i], (args + (egalen + 2)));
+				return ;
+			}
+		}
+		i++;
+	}
+	ft_export_add(var, args, 1);
 }
 
 void	ft_export_check_double(t_m *var, char *args, int egalen)
@@ -54,10 +77,37 @@ void	ft_export_check_double(t_m *var, char *args, int egalen)
 		}
 		i++;
 	}
-	ft_export_add(var, args);
+	ft_export_add(var, args, 0);
 }
 
-void	ft_export_add(t_m *var, char *args)
+char	*ft_strdup_without_one(const char *src)
+{
+	size_t	i;
+	size_t	j;
+	size_t	k;
+	char	*dest;
+
+	j = ft_strlen(src);
+	dest = (char *)malloc(sizeof(char) * (j));
+	if (!dest)
+		return (NULL);
+	dest[j - 1] = '\0';
+	k = 0;
+	while (src[k] && src[k] != '+')
+		k++;
+	i = 0;
+	j = 0;
+	while (src[i])
+	{
+		if (i == k)
+			j++;
+		dest[i] = src[i + j];
+		i++;
+	}
+	return (dest);
+}
+
+void	ft_export_add(t_m *var, char *args, int type)
 {
 	int	i;
 	char **tmp;
@@ -73,7 +123,10 @@ void	ft_export_add(t_m *var, char *args)
 		tmp[i] = (*var).env[i];
 		i++;
 	}
-	tmp[i] = ft_strdup(args);
+	if (type == 0)
+		tmp[i] = ft_strdup(args);
+	if (type == 1)
+		tmp[i] = ft_strdup_without_one(args);
 	free((*var).env);
 	(*var).env = tmp;
 }
@@ -85,7 +138,7 @@ int	ft_export_check_args(char *args, int *egalen)
 	if ((ft_isalpha(args[0]) == 0) && args[0] != '_')
 		return (printf("export: `%s': not a valid identifier\n", args), 0);
 	*egalen = -1;
-	while ((++*egalen) > -1 && args[(*egalen)] && args[(*egalen) + 1] != '=')
+	while ((++*egalen) > -1 && args[(*egalen)] && (args[(*egalen) + 1] != '='))
 	{
 		if (args[*egalen] != '_' && (ft_isalnum(args[*egalen]) == 0))
 			return (printf("export: `%s': not a valid identifier\n", args), 0);
@@ -93,4 +146,26 @@ int	ft_export_check_args(char *args, int *egalen)
 	if (args[*egalen] == '\0')
 		return (0);
 	return ((++*egalen));
+}
+
+int	ft_export_check_addargs(char *args, int *egalen)
+{
+	if (!args && !*args)
+		return (0);
+	if ((ft_isalpha(args[0]) == 0) && args[0] != '_')
+		return (printf("export: `%s': not a valid identifier\n", args), -1);
+	*egalen = -1;
+	while ((++*egalen) > -1 && args[(*egalen)] && (args[(*egalen)] != '='))
+	{
+		if (args[(*egalen) + 1] == '=' && args[(*egalen)] == '+')
+		{
+			if (args[(*egalen) + 2] != '\0')
+				return (*egalen);
+		}
+		if (args[*egalen] != '_' && (ft_isalnum(args[*egalen]) == 0))
+			return (printf("export: `%s': not a valid identifier\n", args), -1);
+	}
+	if (args[*egalen] == '\0')
+		return (-1);
+	return (0);
 }

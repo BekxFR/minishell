@@ -6,7 +6,7 @@
 /*   By: chillion <chillion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/26 17:59:05 by chillion          #+#    #+#             */
-/*   Updated: 2022/11/26 18:27:00 by chillion         ###   ########.fr       */
+/*   Updated: 2022/11/28 18:17:42 by chillion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,20 +44,6 @@ void	ft_free_split_exclude_line(char **str, int line)
 		}
 	}
 	free(str);
-}
-
-int	ft_check_fd_status(char *file, int *fd)
-{
-	*fd = open(file, O_RDONLY | O_RDWR);
-	if (*fd == -1 && ((errno == EACCES) || (errno == EISDIR)))
-	{
-		ft_putstr_fd(file, 2);
-		perror(" ");
-		return (1);
-	}
-	if (*fd != -1)
-		close (*fd);
-	return (0);
 }
 
 void	ft_cleanheredoc_fd(char *str, char *buffer, char *comp, int fd1)
