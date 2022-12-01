@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_fork.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: chillion <chillion@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mgruson <mgruson@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 14:31:02 by chillion          #+#    #+#             */
-/*   Updated: 2022/11/28 11:29:11 by chillion         ###   ########.fr       */
+/*   Updated: 2022/12/01 12:31:12 by mgruson          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,10 @@ void	ft_fork_fail(t_m *var)
 		free((*var).arg);
 	if ((*var).split_path)
 		ft_free_split((*var).split_path);
-	if (((*var).fd1))
-		close((*var).fd1);
-	if ((*var).fd2)
-		close((*var).fd2);
+	if (((*var).fdin))
+		close((*var).fdin);
+	if ((*var).fdout)
+		close((*var).fdout);
 }
 
 void	ft_arg_check_fullpath(char *arg, t_m*var)
@@ -58,31 +58,43 @@ void	ft_init_arg(char *argv, t_m *var)
 
 void	ft_do_fork(t_m *var, char *arg, char **targ, int *pid)
 {
-	(*pid) = fork();
-	if ((*pid) == -1)
-		return (write(2, "Error with fork\n", 17), ft_fork_fail(var));
-	if ((*pid) == 0)
+	var->cmdtype = 0;
+	if (ft_strcmplen(var->redir, "<<") > 0)
 	{
-		ft_init_arg(arg, var); // init arg
-		ft_execve((*var).arg, targ, (*var).env, var); // char *, char **, char **, int
+		handle_heredoc(var);
 	}
-}
-
-void	ft_do_pipe_fork(t_m *var, char *arg, char **targ, int *pid)
-{
-	if (pipe((*var).pipex) == -1)
-		return (write(2, "Error with pipe\n", 17), ft_fork_fail(var));
+	if (is_redir((*var).redir[0]))
+		get_std_redir((*var).redir[0]);
 	(*pid) = fork();
 	if ((*pid) == -1)
 		return (write(2, "Error with fork\n", 17), ft_fork_fail(var));
 	if ((*pid) == 0)
 	{
 		ft_init_arg(arg, var);
+		ft_execve((*var).arg, targ, (*var).env, var);
+	}
+}
+
+void	ft_do_pipe_fork(t_m *var, char *arg, char **targ, int *pid)
+{
+	var->cmdtype = 1;
+	if (ft_strcmplen(var->redir, "<<") > 0)
+		handle_heredoc(var);
+	if (pipe((*var).pipex) == -1)
+		return (write(2, "Error with pipe\n", 17), ft_fork_fail(var));
+	if (is_redir((*var).redir[var->exec]))
+		get_std_redir((*var).redir[var->exec]);
+	(*pid) = fork();
+	if ((*pid) == -1)
+		return (write(2, "Error with fork\n", 17), ft_fork_fail(var));
+	if ((*pid) == 0)
+	{
+		ft_init_arg(arg, var);
+		if ((var->exec + 1) != (var->tablen) && is_redir_out((*var).redir[var->exec]) == 0)
+			dup2((*var).pipex[1], 1);
 		close((*var).pipex[0]);
-		if ((var->exec + var->tabexec + 1) != (var->tablen - 1) && (var->exec + var->tabexec) != (var->tablen - 1))
-			dup2((*var).pipex[1], 1); // dup2 sauf pour le dernier exec
 		close((*var).pipex[1]);
-		ft_execve((*var).arg, targ, (*var).env, var); // char *, char **, char **, pipe
+		ft_execve((*var).arg, targ, (*var).env, var);
 	}
 	else
 	{
