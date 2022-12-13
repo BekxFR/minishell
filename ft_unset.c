@@ -1,23 +1,41 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_env_unset.c                                     :+:      :+:    :+:   */
+/*   ft_unset.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: chillion <chillion@student.42.fr>          +#+  +:+       +#+        */
+/*   By: mgruson <mgruson@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/11/24 16:14:54 by chillion          #+#    #+#             */
-/*   Updated: 2022/11/24 18:55:37 by chillion         ###   ########.fr       */
+/*   Created: 2022/12/05 16:28:16 by mgruson           #+#    #+#             */
+/*   Updated: 2022/12/12 20:34:13 by mgruson          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+void	ft_unset(t_m *var, char **args)
+{
+	int	egalen;
+
+	egalen = 0;
+	if (!args[1])
+		return ;
+	else
+	{
+		while (*args)
+		{
+			if (ft_unset_check_args(*args, &egalen))
+				ft_unset_check_double(var, *args, egalen);
+			args++;
+		}
+	}
+}
 
 void	ft_unset_check_double(t_m *var, char *args, int egalen)
 {
 	int		i;
 
 	i = 0;
-	while((*var).env[i])
+	while ((*var).env[i])
 	{
 		if (!ft_strncmp((*var).env[i], args, egalen) \
 		&& ft_len_beforechar((*var).env[i], '=') == egalen)
@@ -31,14 +49,14 @@ void	ft_unset_check_double(t_m *var, char *args, int egalen)
 
 void	ft_unset_remove(t_m *var, int m)
 {
-	int	i;
-	int	j;
-	char **tmp;
+	int		i;
+	int		j;
+	char	**tmp;
 
 	i = ft_tablen((*var).env);
 	tmp = (char **)malloc(sizeof(char *) * (i));
 	if (!tmp)
-		return (printf("malloc error\n"), exit(1));
+		return (write(2, "malloc error\n", 14), exit(1));
 	tmp[i - 1] = 0;
 	j = 0;
 	i = 0;
@@ -70,45 +88,4 @@ int	ft_unset_check_args(char *args, int *egalen)
 			return (0);
 	}
 	return (*egalen);
-}
-
-void	ft_print_env(char **str)
-{
-	int	i;
-
-	i = 0;
-	while (str[i])
-	{
-		printf("%s\n", str[i]);
-		i++;
-	}
-}
-
-int	ft_env(t_m *var, char **envp)
-{
-	int i;
-	
-	if (!envp)
-	{
-		write(2, "NO ENV\n", 8);
-		(*var).env = (char **)malloc(sizeof(char *) * 1);
-		if (!(*var).env)
-			return (-1);
-		(*var).env[0] = (char *)malloc(sizeof(char) * 1);
-		if (!(*var).env[0])
-			return (free((*var).env), -1);
-		(*var).env[0][0] = 0;
-		return (1);
-	}
-	i = 0;
-	while (envp[i])
-		i++;
-	(*var).env = (char **)malloc(sizeof(char *) * (i + 1));
-	if (!(*var).env)
-		return (-1);
-	(*var).env[i] = 0;
-	i = -1;
-	while (envp[++i])
-		(*var).env[i] = ft_strdup(envp[i]);
-	return (0);
 }

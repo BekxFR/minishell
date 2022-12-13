@@ -6,7 +6,7 @@
 /*   By: mgruson <mgruson@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/21 11:48:30 by mgruson           #+#    #+#             */
-/*   Updated: 2022/12/01 16:04:21 by mgruson          ###   ########.fr       */
+/*   Updated: 2022/12/12 11:43:10 by mgruson          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,8 @@ char	***fill_cmd(char ***cmd, char **args, char ***redir)
 	i = initialize_index();
 	while (args[i.i])
 	{
-		while (args[i.i] && (args[i.i][0] != '|' && args[i.i][0] != '<' && args[i.i][0] != '>'))
+		while (args[i.i] && (args[i.i][0] != '|' && \
+		args[i.i][0] != '<' && args[i.i][0] != '>'))
 			cmd[i.j][i.k++] = args[i.i++];
 		if (args[i.i] && (args[i.i][0] == '<' || args[i.i][0] == '>'))
 		{
@@ -52,9 +53,9 @@ char	***fill_cmd(char ***cmd, char **args, char ***redir)
 			i.j++;
 			i.i1++;
 			i.i2 = 0;
+			free(args[i.i - 1]);
 		}
 	}
-	free(args);
 	return (cmd);
 }
 
@@ -67,7 +68,6 @@ int	set_in_cmd(char **args, t_m *var)
 	if (!var->cmd)
 	{
 		free(var->args_line);
-		free_doubletab(var->env);
 		free_doubletab(args);
 		return (2);
 	}
@@ -75,7 +75,6 @@ int	set_in_cmd(char **args, t_m *var)
 	if (!var->redir)
 	{
 		free(var->args_line);
-		free_doubletab(var->env);
 		free_tripletab(var->cmd);
 		free_doubletab(args);
 		return (2);
@@ -84,8 +83,6 @@ int	set_in_cmd(char **args, t_m *var)
 		return (2);
 	if (malloc_redir(var->redir, args, var) == 2)
 		return (2);
-	printf("c2\n");
 	var->cmd = fill_cmd(var->cmd, args, var->redir);
-	printf("c3\n");
 	return (0);
 }

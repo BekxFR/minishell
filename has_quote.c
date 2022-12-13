@@ -1,40 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strjoin_free.c                                  :+:      :+:    :+:   */
+/*   has_quote.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mgruson <mgruson@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/09/01 15:21:02 by chillion          #+#    #+#             */
-/*   Updated: 2022/12/12 13:14:47 by mgruson          ###   ########.fr       */
+/*   Created: 2022/12/06 19:14:41 by mgruson           #+#    #+#             */
+/*   Updated: 2022/12/06 19:25:17 by mgruson          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "minishell.h"
 
-char	*ft_strjoin_free(char *s1, char *s2)
+int	has_quote(char *str)
 {
-	char	*str;
-	size_t	i;
-	size_t	j;
+	int	i;
+	int	s;
+	int	d;
 
-	i = ft_strlen(s1) + ft_strlen(s2);
-	str = ft_zalloc(i + 1, sizeof * str);
-	if (str == NULL)
-		return (NULL);
 	i = 0;
-	while (s1[i] != '\0')
+	s = 0;
+	d = 0;
+	while (str[i])
 	{
-		str[i] = s1[i];
+		if (str[i] == 34)
+			d++;
+		else if (str[i] == 39)
+			s++;
 		i++;
 	}
-	j = 0;
-	while (s2[j] != '\0')
-	{
-		str[j + i] = s2[j];
-		j++;
-	}
-	str[i + j] = '\0';
-	free(s1);
-	return (str);
+	if (d + s >= 2)
+		return (1);
+	return (0);
 }

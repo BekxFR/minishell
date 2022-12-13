@@ -1,160 +1,128 @@
-
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   minishell.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: chillion <chillion@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/12/13 12:29:26 by chillion          #+#    #+#             */
+/*   Updated: 2022/12/13 13:12:23 by chillion         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "minishell.h"
 
-void	ft_history_init_fd(char *file, int *fd)
+int	g_exit_status;
+
+void	ft_init_heredoc(t_m *var)
 {
-	int	t;
+	pid_t	pid;
 
-	(void)t;
-	(*fd) = open(file, O_RDONLY | O_RDWR | O_APPEND);
-	if (*fd == -1)
+	var->h_status = open(".heredocstatus", O_RDWR | O_CREAT, 0644);
+	close(var->h_status);
+	signal(SIGINT, SIG_IGN);
+	signal(SIGQUIT, SIG_IGN);
+	(pid) = fork();
+	if ((pid) == -1)
+		return (write(2, "Error with fork\n", 17), ft_fork_fail(var));
+	if ((pid) == 0)
 	{
-		t = unlink(file);
-		(*fd) = open(file, O_RDONLY | O_RDWR | O_CREAT, 0644);
+		if (ft_strcmplen(var->redir, "<<") > 0)
+			handle_heredoc_child(var);
+		unlink(".heredocstatus");
+		return (free_child_heredoc(var), exit(1));
 	}
-}
-
-// void	write_first_c(char *buffer, char *str)
-// {
-// 	buffer[0] = '\0';
-// 	str[0] = '\0';
-// }
-
-void	ft_init_commands_history(t_m *var)
-{
-	char *str;
-
-	str = readline("minishell>");
-	if (str)
+	else
 	{
-		ft_history_init_fd(".history", &(*var).h_fd);
-		write((*var).h_fd, str, ft_strlen(str));
-		close((*var).h_fd);
-		// (*var).args_line = str;
-		(*var).args_line = ft_strdup(str);
-		free(str);
+		signal(SIGINT, SIG_IGN);
+		waitpid(pid, 0, 0);
+		g_exit_status = 130;
+		var->h_status = open(".heredocstatus", O_RDWR);
+		ft_signal(1);
 	}
-}
-
-void	ft_print_split(char **str)
-{
-	int	i;
-
-	i = 0;
-	while (str[i])
-	{
-		ft_printf("SPLIT[%d]=%s]\n", i, str[i]);
-		i++;
-	}
-	ft_printf("-----------------\n");
-}
-
-void handle_sigint(int sig)
-{
-	if (sig == SIGINT)
-	{
-		write(1, "\n", 2);
-		rl_on_new_line();
-		rl_replace_line("", 0);
-		rl_redisplay();
-	}
-}
-
-void	ft_free_split(char **str)
-{
-	int	i;
-
-	i = 0;
-	while (str[i])
-	{
-		free(str[i]);
-		i++;
-	}
-	free(str);
+	return ;
 }
 
 void	ft_daddy(t_m *var, int *pid, int nbcmd)
 {
 	int	i;
-	int	status;
 
 	i = 0;
-	status = 0;
-	(void)var;
-	while ((i + i) < nbcmd && nbcmd != 0)
+	ft_signal(2);
+	while (i < nbcmd && nbcmd != 0 && var->h_status == -1)
 	{
-		if (waitpid(pid[i], &status, 0) == -1)
-		{
-			perror("waitpid");
-			exit(EXIT_FAILURE);
-		}
-		if (WIFEXITED(status))
-			status = WEXITSTATUS(status);
-		else if (WIFSIGNALED(status))
-			status = 128 + WTERMSIG(status);
+		if (is_env_builtin(var->cmd[0]) && var->tablen == 1)
+			break ;
+		waitpid(pid[i], &g_exit_status, 0);
+		if (WIFEXITED(g_exit_status))
+			g_exit_status = WEXITSTATUS(g_exit_status);
+		else if (WIFSIGNALED(g_exit_status))
+			g_exit_status = 128 + WTERMSIG(g_exit_status);
 		i++;
 	}
-	free(pid);
+	ft_signal(1);
+	if (var->h_status > 2)
+	{
+		close(var->h_status);
+		var->h_status = 0;
+		unlink(".heredocstatus");
+	}
 }
 
 int	ft_exec(t_m *var, char ***args)
 {
-	int	*pid;
-
 	var->exec = 0;
 	var->tabexec = 0;
-	pid = (int *)malloc(sizeof(int) * (var->tablen + 1));
-	if (!pid)
-		return (printf("malloc error\n"), 1);
-	pid[var->tablen] = 0;
-	if (var->tablen == 1)
-		ft_do_fork(var, args[0][0], args[0], &pid[0]);
-	else if (var->tablen > 1)
+	var->h_status = -1;
+	if (!args)
+		return (0);
+	var->pid = (int *)malloc(sizeof(int) * (var->tablen + 1));
+	if (!var->pid)
+		return (free_parent(var), 1);
+	var->pid[var->tablen] = 0;
+	if (ft_strcmplen(var->redir, "<<") > 0)
+		ft_init_heredoc(var);
+	ft_init_all_pipe(var);
+	if (var->tablen >= 1 && var->h_status == -1)
 	{
 		while ((var->exec) < var->tablen)
 		{
-			ft_do_pipe_fork(var, args[var->exec][0], args[var->exec], &pid[var->exec]);
+			ft_do_pipe_fork(var, args[var->exec][0], \
+			args[var->exec], &var->pid[var->exec]);
 			var->exec++;
 		}
 	}
-	return (ft_daddy(var, pid, var->tablen), 0);
-}
-
-int	ft_puttriplelen(char ***test, t_m *var)
-{
-	var->tablen = 0;
-	if (!test)
-		return (var->tablen);
-	while(test[var->tablen])
-		var->tablen++;
-	return (var->tablen);
+	if (var->h_status != -1)
+		ft_unlink_all(var, 0);
+	ft_daddy(var, var->pid, var->tablen);
+	return (0);
 }
 
 int	main(int argc, char **argv, char **envp)
 {
 	t_m	var;
 
-	signal(SIGINT, handle_sigint); /* ctrl + c  affiche un nouveau prompt */
-	signal(SIGQUIT, SIG_IGN); /* ctrl + \  ne fait rien */
-	(void)argv;
-	(void)envp;
-	if (argc != 1)
-		return (ft_printf("Error : Wrong Number of arguments\n"), 1);
-	if (ft_env(&var, envp) == -1)
+	ft_signal(1);
+	initialize_var(&var);
+	if (ft_create_env(&var, envp) == -1)
 		return (ft_printf("Error : Malloc for keep env fail\n"), 1);
-	if(!*envp)
-		write(2, "EXIT PATH\n", 11);
-	ft_init_commands_history(&var);
-	ft_printf("Command is :%s\n", var.args_line);
-	if (ft_parsing(&var, envp, &var.cmd, &var.redir) == 2)
-		return (2);
-	ft_puttriplelen(var.cmd, &var);
-	ft_exec(&var, var.cmd);
-	free_tripletab(var.cmd);
-	free_tripletab(var.redir);
-	free(var.args_line);
-	ft_free_split(var.env);
-
+	while (1)
+	{
+		var.args_line = NULL;
+		ft_init_commands_history(&var);
+		if (!var.args_line)
+			return (free_doubletab(var.env), rl_clear_history(), \
+			write(2, "exit\n", 6), 0);
+		if (!will_return_nothing(var.args_line) && \
+		is_cmdline_valid(var.args_line, argc, argv))
+		{
+			ft_parsing(&var, var.env, &var.cmd, &var.redir);
+			ft_puttriplelen(var.cmd, &var);
+			ft_exec(&var, var.cmd);
+			update_last_env(&var);
+			free_parent(&var);
+		}
+		free(var.args_line);
+	}
 	return (0);
 }

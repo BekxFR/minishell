@@ -3,129 +3,63 @@
 /*                                                        :::      ::::::::   */
 /*   get_env_var.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mgruson <mgruson@student.42.fr>            +#+  +:+       +#+        */
+/*   By: chillion <chillion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 16:31:04 by mgruson           #+#    #+#             */
-/*   Updated: 2022/12/01 12:20:58 by mgruson          ###   ########.fr       */
+/*   Updated: 2022/12/13 10:43:34 by chillion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-char	*get_env(char *env, char *envp)
-{
-	int	i;
-	int	size;
-	int	j;
+extern int	g_exit_status;
 
-	j = 0;
-	i = 0;
-	size = ft_strlen(envp);
-	while (envp[i])
-	{
-		if (envp[i] && envp[i] == '=')
-		{
-			i++;
-			while (envp[i] && i <= size)
-			{
-				env[j++] = envp[i++];
-			}
-		}
-		i++;
-	}
-	return (env);
+char	*exception_env(char *str, t_index *i)
+{
+	if (ft_isdigit(str[i->i + 1]))
+		str = ft_strcpy(&str[i->i], &str[i->i + 2]);
+	else
+		str = ft_strcpy(&str[i->i], &str[i->i + 1]);
+	str = clear_quote(&str[i->i]);
+	return (str);
 }
 
-char	*add_good_env(char *str, int end, int start, char *envp)
+char	*new_env_var(char *str, char **envp)
 {
 	t_index	i;
-	char	*newstring;
-	char	*env;
+	char	*itoa;
 
+	itoa = ft_itoa(g_exit_status);
 	i = initialize_index();
-	i.count = end - start;
-	i.len = ft_strlen(str) - (i.count + 1) + ft_strlenenv(envp);
-	env = ft_calloc(sizeof(char), (ft_strlenenv(envp) + 1));
-	env = get_env(env, envp);
-	(void)i;
-	newstring = ft_calloc(sizeof(char), (i.len + 1));
-	while (str[i.i1])
-	{
-		while (str[i.i1] && i.i1 != (start - 1))
-			newstring[i.i2++] = str[i.i1++];
-		while (env[i.i3])
-			newstring[i.i2++] = env[i.i3++];
-		i.i1 = i.i1 + i.count + 1;
-		while (str[i.i1])
-			newstring[i.i2++] = str[i.i1++];
-	}
-	free(env);
-	free(str);
-	return (newstring);
-}
-
-char	*remove_wrong_env(char *str, int end, int start)
-{
-	t_index	i;
-	char	*newstring;
-
-	i = initialize_index();
-	i.count = end - start;
-	i.len = ft_strlen(str) - (i.count + 1);
-	(void)i;
-	newstring = ft_calloc(sizeof(char), (i.len + 1));
-	while (str[i.i1])
-	{
-		while (str[i.i1] != '$')
-			newstring[i.i2++] = str[i.i1++];
-		i.i1 = i.i1 + i.count + 1;
-		while (str[i.i1])
-			newstring[i.i2++] = str[i.i1++];
-	}
-	free(str);
-	return (newstring);
-}
-
-char	*new_env_var(char *str, char **envp, t_index i)
-{
 	while (str[i.i])
 	{
-		if (str[i.i] == '$' && ft_isalpha(str[i.i + 1]) > 0 \
+		if (str[i.i] == '$' && ((ft_isalpha(str[i.i + 1]) > 0) || \
+		str[i.i + 1] == '_') && !is_in_simple_quote(str, i.i))
+			str = basic_env(str, envp, &i);
+		if (str[i.i] == '$' && str[i.i + 1] == '?' \
 		&& !is_in_simple_quote(str, i.i))
-		{						
-			i.start = ++i.i;
-			while (str[i.i] && str[i.i] != ' '\
-			&& str[i.i] != 39 && str[i.i] != 34 && str[i.i] != '$')
-				i.end = ++i.i;
-			i.j = is_in_env(envp, str, i.end, i.start);
-			printf("test i.j %i\n", i.j);
-			if (i.j > -1)
-			{
-				str = add_good_env(str, i.end, i.start, envp[i.j]);
-				i.i = i.start - 2 + ft_strlenenv(envp[i.j]);
-			}
-			else
-			{
-				str = remove_wrong_env(str, i.end, i.start);
-				i.i = i.start - 2;
-			}
-			i.j = 0;
-		}
-		i.i++;
+			str = get_status(str, (i.i + ft_intlen(g_exit_status) + 1), \
+			(i.i + 1), itoa);
+		if (str[i.i] == '$' && (ft_isdigit(str[i.i + 1]) > 0 \
+		|| (str[i.i + 1] == 34 || str[i.i + 1] == 39)) \
+		&& !is_in_simple_quote(str, i.i))
+			str = exception_env(str, &i);
+		if (str[i.i])
+			i.i++;
 	}
-	return (str);
+	return (free(itoa), str);
 }
 
 char	**get_env_var(char **args, char **envp)
 {
 	t_index	i;
-	t_index	a;
 
 	i = initialize_index();
-	a = initialize_index();
 	while (args[i.i])
 	{
-		args[i.i] = new_env_var(args[i.i], envp, a);
+		if ((args[i.i] && i.i == 0) || (i.i >= 1 && \
+		!ft_strcmp(args[i.i - 1], "<<") == 0))
+			args[i.i] = new_env_var(args[i.i], envp);
 		i.i++;
 	}
 	return (args);

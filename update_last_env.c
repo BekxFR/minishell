@@ -1,40 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_strjoin_free.c                                  :+:      :+:    :+:   */
+/*   update_last_env.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mgruson <mgruson@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/09/01 15:21:02 by chillion          #+#    #+#             */
-/*   Updated: 2022/12/12 13:14:47 by mgruson          ###   ########.fr       */
+/*   Created: 2022/12/08 13:28:56 by mgruson           #+#    #+#             */
+/*   Updated: 2022/12/12 21:27:57 by mgruson          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "minishell.h"
 
-char	*ft_strjoin_free(char *s1, char *s2)
+int	update_last_env(t_m *var)
 {
-	char	*str;
-	size_t	i;
-	size_t	j;
+	int	i;
+	int	j;
 
-	i = ft_strlen(s1) + ft_strlen(s2);
-	str = ft_zalloc(i + 1, sizeof * str);
-	if (str == NULL)
-		return (NULL);
+	j = 0;
 	i = 0;
-	while (s1[i] != '\0')
+	if (!var->cmd || !var->cmd[i] || !var->cmd[i][j])
 	{
-		str[i] = s1[i];
+		return (0);
+	}
+	while (var->cmd[i])
+	{
+		j = 0;
+		while (var->cmd[i][j])
+			j++;
 		i++;
 	}
-	j = 0;
-	while (s2[j] != '\0')
-	{
-		str[j + i] = s2[j];
-		j++;
-	}
-	str[i + j] = '\0';
-	free(s1);
-	return (str);
+	export_env("_=", var->cmd[i - 1][j - 1], var);
+	return (1);
 }

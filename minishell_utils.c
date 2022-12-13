@@ -1,51 +1,34 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   mathieu_utils.c                                    :+:      :+:    :+:   */
+/*   minishell_utils.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mgruson <mgruson@student.42.fr>            +#+  +:+       +#+        */
+/*   By: chillion <chillion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/16 12:36:40 by mgruson           #+#    #+#             */
-/*   Updated: 2022/11/30 18:12:39 by mgruson          ###   ########.fr       */
+/*   Updated: 2022/12/13 13:09:45 by chillion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	ft_putdoubletab(char **tab)
+char	*ft_strcpy(char *dest, char *src)
 {
-	static int j = 0;
 	int	i;
 
 	i = 0;
-	if (!tab)
-		return ;
-	printf("command %i :\n", j++);
-	while (tab[i])
+	while (src[i] != '\0')
 	{
-		ft_putstr(tab[i]);
-		write(1, "\n", 1);
-		i++;
-	}	
-}
-
-void	ft_puttripletab(char ***test)
-{
-	int i ; 
-
-	i = 0;
-	if (!test)
-		return ;
-	while(test[i])
-	{
-		ft_putdoubletab(test[i]);
+		dest[i] = src[i];
 		i++;
 	}
+	dest[i] = '\0';
+	return (dest);
 }
 
 int	ft_strcmp(char *s1, char *s2)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (s1[i] == s2[i] && s1[i] != '\0' && s2[i] != '\0')
@@ -65,9 +48,9 @@ int	ft_tablen(char **tab)
 	return (y);
 }
 
-int		ft_intlen(int nbr)
+int	ft_intlen(int nbr)
 {
-	int int_len;
+	int	int_len;
 
 	int_len = 0;
 	if (nbr < 0)
@@ -84,36 +67,24 @@ int		ft_intlen(int nbr)
 	return (int_len);
 }
 
-int	ft_strlenint(char *str)
+int	ft_strcmplen(char ***redir, char *str)
 {
 	int	i;
+	int	j;
+	int	k;
 
+	k = 0;
 	i = 0;
-	while (str[i] != '\0')
+	while (redir[i])
 	{
+		j = 0;
+		while (redir[i][j])
+		{
+			if (ft_strcmp(redir[i][j], str) == 0)
+				k++;
+			j++;
+		}
 		i++;
 	}
-	return (i);
-}
-
-int ft_strcmplen(char ***redir, char *str)
-{
-    int i;
-    int j;
-    int k;
-
-    k = 0;
-    i = 0;
-    while(redir[i])
-    {
-        j = 0;
-        while(redir[i][j])
-        {
-            if (strcmp(redir[i][j], str) == 0)
-                k++;
-            j++;
-        }
-        i++;
-    }
-    return (k);   
+	return (k);
 }

@@ -3,90 +3,87 @@
 /*                                                        :::      ::::::::   */
 /*   ft_heredoc.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mgruson <mgruson@student.42.fr>            +#+  +:+       +#+        */
+/*   By: chillion <chillion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/09 16:46:47 by chillion          #+#    #+#             */
-/*   Updated: 2022/11/30 16:01:30 by mgruson          ###   ########.fr       */
+/*   Updated: 2022/12/13 12:25:33 by chillion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
 #include "minishell.h"
 
-int	ft_eof_find(char *str, char *comp, int i, t_m *var)
-{
-	int	j;
-	int	k;
+extern int	g_exit_status;
 
-	k = ft_strlen(comp);
-	if (i < k)
-		return (1);
-	j = ft_strncmp((str + (i - k)), comp, k);
-	if (j == 0 && (i == k || str[i - k - 1] == '\n'))
+char	*basic_env_heredoc(char *str, char **envp, t_index *i)
+{
+	i->start = ++i->i;
+	while (str[i->i] && (isalnum(str[i->i]) || str[i->i] == '_'))
+		i->end = ++i->i;
+	i->j = is_in_env(envp, str, i->end, i->start);
+	if (i->j > -1)
 	{
-		write((*var).fdin, str, (ft_strlen(str) - k));
-		close((*var).fdin);
-		return (0);
+		str = add_good_env(str, i->end, i->start, envp[i->j]);
+		i->i = i->start - 1;
 	}
-	return (1);
-}
-
-void	ft_write_here_sign(char c)
-{
-	if (c == '\n')
+	else
 	{
-		write(1, ">", 1);
+		str = remove_wrong_env(str, i->end, i->start);
+		i->i = i->start - 1;
 	}
+	i->j = 0;
+	return (str);
 }
 
-void	write_first_c(char *buffer, char *str)
+char	*new_env_var_heredoc(char *str, char **envp, t_m *var)
 {
-	buffer[0] = '\0';
-	str[0] = '\0';
+	t_index	i;
+	char	*itoa;
+
+	itoa = ft_itoa(g_exit_status);
+	(void)var;
+	i = initialize_index();
+	while (str[i.i])
+	{
+		if (str[i.i] == '$' && ((ft_isalpha(str[i.i + 1]) > 0) || \
+		str[i.i + 1] == '_'))
+			str = basic_env_heredoc(str, envp, &i);
+		if (str[i.i] == '$' && str[i.i + 1] == '?')
+			str = get_status(str, (i.i + ft_intlen(g_exit_status) + 1), \
+			(i.i + 1), itoa);
+		if (str[i.i] == '$' && (ft_isdigit(str[i.i + 1]) > 0 \
+		|| (str[i.i + 1] == 34 || str[i.i + 1] == 39)))
+			str = exception_env(str, &i);
+		if (str[i.i])
+			i.i++;
+	}
+	return (free(itoa), str);
 }
 
-void	ft_heredoc_fd(t_m *var, int n, int j)
+void	ft_heredoc_fd(t_m *var, int n)
 {
-	char	*buffer;
 	char	*str;
+	int		quote;
 
-	buffer = (char *)malloc(sizeof(char) * 2);
-	if (!buffer)
-		return ;
-	str = (char *)malloc(sizeof(char) * 2);
-	if (!str)
-		return ;
-	write_first_c(buffer, str);
-	write(1, ">", 1);
+	(void)n;
+	quote = !has_quote(var->comp);
+	ft_signal(3);
 	while (n > 0)
 	{
-		n = (read(0, buffer, 1));
-		if (n == -1)
-			ft_cleanheredoc_fd(str, buffer, (*var).comp, (*var).fdin);
-		buffer[1] = '\0';
-		str = ft_strjoin_free(str, buffer);
-		if (!ft_eof_find(str, (*var).comp, j, var))
-			break ;
-		ft_write_here_sign(buffer[0]);
-		j++;
+		str = readline(">");
+		if (!str)
+		{
+			write(2, "warning: don't find end-of-file (wanted `", 42);
+			ft_putstr_fd((*var).comp, 2);
+			write(2, "')\n", 4);
+			return ;
+		}
+		if (ft_strcmp(clear_quote((*var).comp), str) == 0)
+			return ;
+		if (quote == 1)
+			str = new_env_var_heredoc(str, var->env, var);
+		write((*var).fdin, str, ft_strlen(str));
+		write((*var).fdin, "\n", 2);
+		free(str);
 	}
-	return (write((*var).fdin, str, (ft_strlen(str) - ft_strlen(var->comp))), ft_cleanheredoc_fd(str, buffer, (*var).comp, (*var).fdin));
-	// return (ft_cleanheredoc_fd(str, buffer, (*var).comp, (*var).fdin));
-}
-
-void	ft_check_heredoc(char *argv, char *stop, t_m *var)
-{
-	int	n;
-	int	j;
-
-	n = 1;
-	j = 1;
-	(*var).heredoc_status = 0;
-	if (!ft_strncmp(argv, "<<", ft_strlen(argv)))
-	{
-		(*var).comp = ft_strjoin(stop, "\n");
-		(*var).heredoc_status = 1;
-		ft_trunc_init_fd(".tmpheredoc", &(*var).fdin);
-		ft_heredoc_fd(var, n, j);
-	}
+	return (ft_cleanheredoc_fd(NULL, str, (*var).comp, (*var).fdin));
 }

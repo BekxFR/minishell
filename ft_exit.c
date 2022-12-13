@@ -3,27 +3,51 @@
 /*                                                        :::      ::::::::   */
 /*   ft_exit.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mgruson <mgruson@student.42.fr>            +#+  +:+       +#+        */
+/*   By: chillion <chillion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/14 17:34:02 by mgruson           #+#    #+#             */
-/*   Updated: 2022/11/14 17:41:13 by mgruson          ###   ########.fr       */
+/*   Updated: 2022/12/13 11:05:16 by chillion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdlib.h>
+#include "minishell.h"
 
-/*
-Faut-il que ca exit la page shell ou juste notre programm shell ?
+extern int	g_exit_status;
 
-*/
-
-int ft_exit(void)
+void	ft_exit_1(t_m *var)
 {
-	exit (0);
+	g_exit_status = 1;
+	write(2, "exit: too many arguments\n", 25);
+	if (var->tablen > 1)
+	{
+		free_child(var);
+		exit(1);
+	}
+	return ;
 }
 
-int main(void)
+void	ft_exit(t_m *var, char **cmd)
 {
-	ft_exit();	
-	return (0);
+	if (is_str_digit(cmd[1]) && ft_tablen(cmd) > 2)
+		ft_exit_1(var);
+	else if (cmd[1] && is_str_digit(cmd[1]) == 0)
+	{
+		write(2, "exit : ", 8);
+		ft_putstr_fd(cmd[1], 2);
+		write(2, ": numeric argument required\n", 29);
+		free_child(var);
+		exit(2);
+	}
+	else if (ft_tablen(cmd) == 1)
+	{
+		write(2, "exit\n", 5);
+		free_child(var);
+		exit(0);
+	}
+	else if (cmd[1] && is_str_digit(cmd[1]))
+	{	
+		g_exit_status = ft_atoi(cmd[1]);
+		free_child(var);
+		exit (g_exit_status);
+	}
 }
