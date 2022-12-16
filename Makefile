@@ -5,7 +5,7 @@ NAME := minishell.a
 SOFT_NAME := minishell
 
 CC := gcc
-FLAGS := -Wall -Wextra -Werror -lreadline -I includes/
+FLAGS := -Wall -Wextra -Werror -lreadline -g3 -I includes/
 SRC_DIR := sources/
 OBJ_DIR := objects/
 AR := ar rc
@@ -58,6 +58,7 @@ SRCS =	basic_env.c \
 		is_cmdline_valid.c \
 		is_in_quote.c \
 		is_redir.c \
+		main_utils.c \
 		malloc_args.c \
 		malloc_cmd.c \
 		malloc_redir.c \
@@ -76,25 +77,19 @@ OBJ = $(addprefix $(OBJ_DIR),$(OBJS))
 
 OBJF := .cache_exists
 
-all : ${LIBFT} ${NAME} ${SOFT_NAME}
+all : ${LIBFT} ${SOFT_NAME}
 
 ${LIBFT} :
 	${MAKE} all -C libs/libft
-	cp ${LIBFT} ${NAME}
-
-${NAME} : ${OBJ}
-	@echo "${BLUE}###${NC}Update de l'archive ${NAME}${BLUE}###${MAGENTA}"
-	${AR} ${NAME} ${OBJ}
-	@echo "${NC}"
 
 ${OBJ_DIR}%.o : %.c | $(OBJF)
 	@echo "${BLUE}###${NC}Creation du fichier ${@:%.c=%.o}${BLUE}###${ORANGE}"
 	${CC} ${FLAGS} -c $< -o $@
 	@echo "${NC}"
 
-${SOFT_NAME} :
-	@echo "${BLUE}###${NC}Creation du fichier ${SOFT_NAME}${BLUE}###${ORANGE}"
-	${CC} ${NAME} ${FLAGS} -o ${SOFT_NAME}
+${SOFT_NAME} : ${OBJ}
+	@echo "${BLUE}###${NC}Creation du fichier ${SOFT_NAME}${BLUE}###${MAGENTA}"
+	${CC} ${OBJ} ${FLAGS} ${LIBFT} -o ${SOFT_NAME}
 	@echo "${NC}"
 
 $(OBJF) :

@@ -6,7 +6,7 @@
 /*   By: chillion <chillion@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/13 12:29:26 by chillion          #+#    #+#             */
-/*   Updated: 2022/12/13 13:12:23 by chillion         ###   ########.fr       */
+/*   Updated: 2022/12/16 17:59:16 by chillion         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@ void	ft_init_heredoc(t_m *var)
 	{
 		if (ft_strcmplen(var->redir, "<<") > 0)
 			handle_heredoc_child(var);
-		unlink(".heredocstatus");
+		if (g_exit_status != -42)
+			unlink(".heredocstatus");
 		return (free_child_heredoc(var), exit(1));
 	}
 	else
@@ -40,7 +41,6 @@ void	ft_init_heredoc(t_m *var)
 		var->h_status = open(".heredocstatus", O_RDWR);
 		ft_signal(1);
 	}
-	return ;
 }
 
 void	ft_daddy(t_m *var, int *pid, int nbcmd)
@@ -98,10 +98,25 @@ int	ft_exec(t_m *var, char ***args)
 	return (0);
 }
 
+void	ft_check_args(int argc)
+{
+	if (argc > 1)
+	{
+		write(2, "Invalid number of arguments\n", 29);
+		exit(1);
+	}
+	if (!isatty(0))
+	{
+		write(2, "Error invalid STDIN\n", 21);
+		exit(1);
+	}
+}
+
 int	main(int argc, char **argv, char **envp)
 {
 	t_m	var;
 
+	ft_check_args(argc);
 	ft_signal(1);
 	initialize_var(&var);
 	if (ft_create_env(&var, envp) == -1)
@@ -110,17 +125,15 @@ int	main(int argc, char **argv, char **envp)
 	{
 		var.args_line = NULL;
 		ft_init_commands_history(&var);
-		if (!var.args_line)
-			return (free_doubletab(var.env), rl_clear_history(), \
-			write(2, "exit\n", 6), 0);
 		if (!will_return_nothing(var.args_line) && \
 		is_cmdline_valid(var.args_line, argc, argv))
 		{
+			var.args_line = new_env_var(var.args_line, var.env);
 			ft_parsing(&var, var.env, &var.cmd, &var.redir);
-			ft_puttriplelen(var.cmd, &var);
-			ft_exec(&var, var.cmd);
-			update_last_env(&var);
-			free_parent(&var);
+			if ((empty(var.cmd, &var) + empty(var.redir, &var)) > 0)
+				do_exec(&var);
+			else
+				free_parsing(&var);
 		}
 		free(var.args_line);
 	}
