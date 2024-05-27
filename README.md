@@ -9,7 +9,7 @@
 ##### Usage
 
 ```bash
-  gcl https://github.com/trobert42/minishell.git
+  gcl https://github.com/BekxFR/minishell.git
   cd minishell
   make
   ./minishell
